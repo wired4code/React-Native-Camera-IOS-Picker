@@ -9,23 +9,62 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  View
+  View,
+  ImagePicker,
+  Image,
+  TouchableOpacity,
+  Platform
 } from 'react-native';
 
 export default class CameraRollPicker extends Component {
-  render() {
+
+  constructor (props) {
+    super(props);
+    this.state = {
+      image: null
+    }
+    this.chooseImageFromGallery = this.chooseImageFromGallery.bind(this);
+    this.chooseImageFromCamera = this.chooseImageFromCamera.bind(this);
+  }
+
+  chooseImage () {
+    ImagePicker.showImagePicker(response => {
+      console.log("Response", response);
+
+      if (response.didCancel) {
+        console.log("User cancelled image picker");
+      } else if (response.error) {
+        console.log("ERROR", response.error);
+      } else if (response.customButton) {
+        console.log("User selected custom button", response.customButton);
+      } else {
+        let source = {uri: response.uri.replace("file://", ""), isStatic: true};
+
+        if (Platform.OS === "android") {
+          source = {uri: response.uri, isStatic: true};
+        }
+        this.setState({"image": source});
+      }
+
+    })
+  }
+
+  render () {
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.android.js
-        </Text>
-        <Text style={styles.instructions}>
-          Double tap R on your keyboard to reload,{'\n'}
-          Shake or press menu button for dev menu
-        </Text>
+      <View style={{flex: 1}}>
+
+        <View style={{flex: 1}}>
+          {this.state.image ? <Image style={{flex: 1}} source={this.state.image}></Image> : null}
+        </View>
+
+        <View style={styles.container}>
+
+          <TouchableOpacity style={styles.button} onPress={this.chooseImage}>
+            <Text style={styles.buttonText}>Choose Image</Text>
+          </TouchableOpacity>
+
+        </View>
+
       </View>
     );
   }
@@ -34,20 +73,24 @@ export default class CameraRollPicker extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
+  button: {
+    backgroundColor: 'gray',
+    width: 150,
+    height: 50,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: 10
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
-  },
+  buttonText: {
+    color: 'white'
+  }
+
 });
 
 AppRegistry.registerComponent('CameraRollPicker', () => CameraRollPicker);
