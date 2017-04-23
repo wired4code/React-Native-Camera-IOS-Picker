@@ -10,10 +10,12 @@ import {
   StyleSheet,
   Text,
   View,
-  ImagePickerIOS,
   Image,
-  TouchableOpacity
+  TouchableOpacity,
+  Platform
 } from 'react-native';
+
+var ImagePicker = require("react-native-image-picker");
 
 export default class CameraRollPicker extends Component {
 
@@ -22,24 +24,31 @@ export default class CameraRollPicker extends Component {
     this.state = {
       image: null
     }
-    this.chooseImageFromGallery = this.chooseImageFromGallery.bind(this);
-    this.chooseImageFromCamera = this.chooseImageFromCamera.bind(this);
+    this.chooseImage = this.chooseImage.bind(this);
+    console.log("IMAGE PICKER", ImagePicker);
   }
 
-  chooseImageFromGallery () {
-    ImagePickerIOS.openSelectDialog({}, imageUri => {
-      this.setState({image: imageUri});
-    }, () => {
-        console.log("user cancels selection");
-    });
-  }
+  chooseImage () {
+    console.log("IMAGE PICKER", ImagePicker);
+    ImagePicker.showImagePicker({noData: true}, (response) => {
+      console.log("Response", response);
 
-  chooseImageFromCamera () {
-    ImagePickerIOS.openSelectDialog({}, imageUri => {
-      this.setState({image: imageUri});
-    }, () => {
-        console.log("user cancels selection");
-    });
+      if (response.didCancel) {
+        console.log("User cancelled image picker");
+      } else if (response.error) {
+        console.log("ERROR", response.error);
+      } else if (response.customButton) {
+        console.log("User selected custom button", response.customButton);
+      } else {
+        let source = {uri: response.uri.replace("file://", ""), isStatic: true};
+
+        if (Platform.OS === "android") {
+          source = {uri: response.uri, isStatic: true};
+        }
+        this.setState({"image": source});
+      }
+
+    })
   }
 
   render () {
@@ -47,17 +56,13 @@ export default class CameraRollPicker extends Component {
       <View style={{flex: 1}}>
 
         <View style={{flex: 1}}>
-          {this.state.image ? <Image style={{flex: 1}} source={{uri: this.state.image}}></Image> : null}
+          {this.state.image ? <Image style={{flex: 1}} source={this.state.image}></Image> : null}
         </View>
 
         <View style={styles.container}>
 
-          <TouchableOpacity style={styles.button} onPress={this.chooseImageFromGallery}>
-            <Text style={styles.buttonText}>Open from Gallery</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.button} onPress={this.chooseImageFromCamera}>
-            <Text style={styles.buttonText}>Open from Camera</Text>
+          <TouchableOpacity style={styles.button} onPress={this.chooseImage}>
+            <Text style={styles.buttonText}>Choose Image</Text>
           </TouchableOpacity>
 
         </View>
