@@ -25,12 +25,20 @@ export default class CameraRollPicker extends Component {
       image: null
     }
     this.chooseImage = this.chooseImage.bind(this);
-    console.log("IMAGE PICKER", ImagePicker);
+    this.takePhoto = this.takePhoto.bind(this);
+    this.setImage = this.setImage.bind(this);
+  }
+
+  takePhoto () {
+    ImagePicker.launchCamera({noData: true}, this.setImage);
   }
 
   chooseImage () {
-    console.log("IMAGE PICKER", ImagePicker);
-    ImagePicker.showImagePicker({noData: true}, (response) => {
+    ImagePicker.launchImageLibrary({noData: true}, this.setImage);
+  }
+
+  setImage (response) {
+
       console.log("Response", response);
 
       if (response.didCancel) {
@@ -47,8 +55,6 @@ export default class CameraRollPicker extends Component {
         }
         this.setState({"image": source});
       }
-
-    })
   }
 
   render () {
@@ -61,8 +67,12 @@ export default class CameraRollPicker extends Component {
 
         <View style={styles.container}>
 
+          <TouchableOpacity style={styles.button} onPress={this.takePhoto}>
+            <Text style={styles.buttonText}>Launch Camera</Text>
+          </TouchableOpacity>
+
           <TouchableOpacity style={styles.button} onPress={this.chooseImage}>
-            <Text style={styles.buttonText}>Choose Image</Text>
+            <Text style={styles.buttonText}>Open Gallary</Text>
           </TouchableOpacity>
 
         </View>
