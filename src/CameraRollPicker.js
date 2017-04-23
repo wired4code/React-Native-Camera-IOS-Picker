@@ -45,6 +45,7 @@ class CameraRollPicker extends Component {
         console.log("User cancelled image picker");
       } else if (response.error) {
         console.log("ERROR", response.error);
+        alert(response.error);
       } else if (response.customButton) {
         console.log("User selected custom button", response.customButton);
       } else {
