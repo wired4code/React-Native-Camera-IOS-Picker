@@ -8,7 +8,7 @@ import {
   Image
 } from 'react-native';
 
-const ImagePicker = require("react-native-image-picker");
+import ImagePicker from 'react-native-image-picker';
 
 export default class Camera extends Component {
 
@@ -16,7 +16,7 @@ export default class Camera extends Component {
     super(props);
     this.state = {
       image: null,
-      cameratext: this.props.text
+      cameraButtonText: this.props.text
     }
   }
 
@@ -25,42 +25,41 @@ export default class Camera extends Component {
   }
 
   setImage = (response) => {
-
-      if (response.didCancel) {
-        console.log("User cancelled image picker");
-      } else if (response.error) {
-        console.log("ERROR", response.error);
-        alert(response.error);
-      } else if (response.customButton) {
-        console.log("User selected custom button", response.customButton);
-      } else {
-        let source = (Platform.OS === "android") ?
-          {uri: response.uri, isStatic: true} :
-          {uri: response.uri.replace("file://", ""), isStatic: true};
-
-        this.setState({'image': source, 'cameratext': this.props.next});
+      if (response.error) {
+        alert('Error', response.error);
+        return;
       }
+
+      let source = (Platform.OS === 'android') ?
+        {uri: response.uri, isStatic: true} :
+        {uri: response.uri.replace('file://', ''), isStatic: true};
+      this.setState({'image': source, 'cameraButtonText': this.props.next});
+  }
+
+  showPlaceHolder = () => {
+    return <View style={styles.placeHolderTextView}>
+               <Text style={styles.placeHolderText}>Step 1: Photo of Your Drawing</Text>
+           </View>;
   }
 
   hasImage = () => {
-    return this.state.image ? <Image style={{flex: 1}} source={this.state.image}></Image> :
-      <View style={{flex: 1, justifyContent: 'center', alignSelf: 'center'}}>
-        <Text style={{color: 'black', fontSize: 20}}>Step 1: Photo of Your Drawing</Text>
-      </View>;
+    return this.state.image ? <Image style={{flex: 1}} source={this.state.image}></Image> : this.showPlaceHolder();
   }
 
-  photoTaken = () => {
-    return this.state.image ? <TouchableOpacity style={styles.button} onPress={() => onNextStep()}>
-            <Text style={styles.buttonText}>{this.props.nextStep}</Text>
-          </TouchableOpacity> : null;
+  showNextButton = () => {
+      return <TouchableOpacity style={styles.button} onPress={() => this.props.nextStepAction()}>
+                <Text style={styles.buttonText}>{this.props.nextStepButtonText}</Text>
+             </TouchableOpacity>
   }
+
+  photoTaken = () => this.state.image ? this.showNextButton() : null;
 
   render () {
 
     return (
-      <View style={{flex: 1, backgroundColor: 'green'}}>
+      <View style={styles.screen}>
 
-        <View style={{flex: 1, margin: 25, borderColor: 'black', borderStyle: 'solid', borderWidth: 1, backgroundColor: 'white'}}>
+        <View style={styles.imageBox}>
           {this.hasImage()}
         </View>
 
@@ -80,6 +79,10 @@ export default class Camera extends Component {
 }
 
 const styles = StyleSheet.create({
+  screen: {
+      flex: 1,
+      backgroundColor: 'green'
+  },
   container: {
     flex: 1,
     flexDirection: 'row',
@@ -97,6 +100,22 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: 'white'
+  },
+  placeHolderTextView: {
+      flex: 1,
+      justifyContent: 'center',
+      alignSelf: 'center'
+  },
+  placeHolderText: {
+      color: 'black',
+      fontSize: 20
+  },
+  imageBox: {
+      flex: 1,
+      margin: 25,
+      borderColor: 'black',
+      borderStyle: 'solid',
+      borderWidth: 1,
+      backgroundColor: 'white'
   }
-
 });
