@@ -1,1 +1,4 @@
-import CameraRollPicker from "./src/CameraRollPicker";
+import { AppRegistry } from 'react-native';
+import App from "./src/index";
+
+AppRegistry.registerComponent('CameraRollPicker', () => App);

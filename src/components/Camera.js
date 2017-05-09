@@ -1,45 +1,30 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
 import React, { Component } from 'react';
 import {
-  AppRegistry,
   StyleSheet,
   Text,
   View,
-  Image,
   TouchableOpacity,
-  Platform
+  Platform,
+  Image
 } from 'react-native';
 
-var ImagePicker = require("react-native-image-picker");
+const ImagePicker = require("react-native-image-picker");
 
-class CameraRollPicker extends Component {
+export default class Camera extends Component {
 
   constructor (props) {
     super(props);
     this.state = {
-      image: null
+      image: null,
+      cameratext: this.props.text
     }
-    this.chooseImage = this.chooseImage.bind(this);
-    this.takePhoto = this.takePhoto.bind(this);
-    this.setImage = this.setImage.bind(this);
   }
 
-  takePhoto () {
+  takePhoto = () => {
     ImagePicker.launchCamera({noData: true}, this.setImage);
   }
 
-  chooseImage () {
-    ImagePicker.launchImageLibrary({noData: true}, this.setImage);
-  }
-
-  setImage (response) {
-
-      console.log("Response", response);
+  setImage = (response) => {
 
       if (response.didCancel) {
         console.log("User cancelled image picker");
@@ -53,27 +38,39 @@ class CameraRollPicker extends Component {
           {uri: response.uri, isStatic: true} :
           {uri: response.uri.replace("file://", ""), isStatic: true};
 
-        this.setState({"image": source});
+        this.setState({'image': source, 'cameratext': this.props.next});
       }
   }
 
-  render () {
-    return (
-      <View style={{flex: 1}}>
+  hasImage = () => {
+    return this.state.image ? <Image style={{flex: 1}} source={this.state.image}></Image> :
+      <View style={{flex: 1, justifyContent: 'center', alignSelf: 'center'}}>
+        <Text style={{color: 'black', fontSize: 20}}>Step 1: Photo of Your Drawing</Text>
+      </View>;
+  }
 
-        <View style={{flex: 1}}>
-          {this.state.image ? <Image style={{flex: 1}} source={this.state.image}></Image> : null}
+  photoTaken = () => {
+    return this.state.image ? <TouchableOpacity style={styles.button} onPress={() => onNextStep()}>
+            <Text style={styles.buttonText}>{this.props.nextStep}</Text>
+          </TouchableOpacity> : null;
+  }
+
+  render () {
+
+    return (
+      <View style={{flex: 1, backgroundColor: 'green'}}>
+
+        <View style={{flex: 1, margin: 25, borderColor: 'black', borderStyle: 'solid', borderWidth: 1, backgroundColor: 'white'}}>
+          {this.hasImage()}
         </View>
 
         <View style={styles.container}>
 
           <TouchableOpacity style={styles.button} onPress={this.takePhoto}>
-            <Text style={styles.buttonText}>Launch Camera</Text>
+            <Text style={styles.buttonText}>{this.state.cameratext}</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.button} onPress={this.chooseImage}>
-            <Text style={styles.buttonText}>Open Gallary</Text>
-          </TouchableOpacity>
+          <View>{this.photoTaken()}</View>
 
         </View>
 
@@ -87,8 +84,7 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: 'row',
     justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    alignItems: 'center'
   },
   button: {
     backgroundColor: 'gray',
@@ -104,5 +100,3 @@ const styles = StyleSheet.create({
   }
 
 });
-
-AppRegistry.registerComponent('CameraRollPicker', () => CameraRollPicker);
